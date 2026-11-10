@@ -54,7 +54,7 @@ export function createNoteStore(file) {
     },
     remove(id) {
       return update(notes => {
-        // Preserve support for numeric IDs from the original application.
+        // On garde la compatibilité avec les identifiants numériques de l'application d'origine.
         const index = notes.findIndex(note => String(note.id) === id);
         if (index < 0) return { changed: false, value: false };
         notes.splice(index, 1);

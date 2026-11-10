@@ -58,7 +58,7 @@ export function createApp({ file, allowedOrigins = LOCAL_ORIGINS }) {
     }
     const notes = await store.list();
     const size = 10;
-    // Pagination starts at 1 (original correction by Hugo, PR #8).
+    // Les pages commencent à 1 : la page 1 couvre les index 0 à 9.
     const start = (page - 1) * size;
     res.set('X-Total-Count', String(notes.length));
     res.json(notes.slice(start, start + size));
