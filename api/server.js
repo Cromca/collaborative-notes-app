@@ -26,10 +26,15 @@ app.post("/notes", (req, res) => {
 });
 
 app.get("/notes", (req, res) => {
-  const page = Number(req.query.page) || 1;
+  const page = req.query.page === undefined ? 1 : Number(req.query.page);
+  if (!Number.isInteger(page) || page < 1) {
+    return res.status(400).json({ error: "page doit être un entier supérieur ou égal à 1" });
+  }
   const size = 10;
   const n = load();
-  res.json(n.slice(page * size, (page + 1) * size));
+  // les pages commencent à 1, donc la page 1 va de l'index 0 à 9
+  const debut = (page - 1) * size;
+  res.json(n.slice(debut, debut + size));
 });
 
 app.get("/notes/by-tag/:tag", (req, res) => {
