@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createNote, getNotes } from './api';
 import './App.css';
 
+const makeRequestKey = (page, query, revision) => JSON.stringify([page, query, revision]);
+
 export default function App() {
   const [notes, setNotes] = useState([]);
   const [search, setSearch] = useState('');
@@ -18,12 +20,13 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const submissionLock = useRef(false);
   const query = search.trim();
-  const requestKey = JSON.stringify([page, query, revision]);
+  const requestKey = makeRequestKey(page, query, revision);
   const loading = settledRequest !== requestKey;
   const lastPage = Math.max(1, Math.ceil(total / 10));
 
   useEffect(() => {
     const controller = new AbortController();
+    const key = makeRequestKey(page, query, revision);
     let active = true;
     getNotes({ page, query, signal: controller.signal })
       .then(result => {
@@ -36,9 +39,9 @@ export default function App() {
       .catch(error => {
         if (active && error.name !== 'AbortError') setListError(error.message);
       })
-      .finally(() => { if (active) setSettledRequest(requestKey); });
+      .finally(() => { if (active) setSettledRequest(key); });
     return () => { active = false; controller.abort(); };
-  }, [page, query, requestKey]);
+  }, [page, query, revision]);
 
   async function addNote(event) {
     event.preventDefault();
