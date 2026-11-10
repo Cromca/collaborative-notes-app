@@ -1,16 +1,18 @@
-# React + Vite
+# Interface notes-app
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interface React/Vite en français. Le guide complet est dans [../README.md](../README.md).
 
-Currently, two official plugins are available:
+```sh
+npm ci
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+L'API doit être démarrée dans un autre terminal (`cd api`, puis `npm start`). Pour une autre adresse d'API, définir `VITE_API_URL` avant de démarrer Vite. Si le port du front change, adapter aussi `CORS_ORIGINS` côté API.
 
-## React Compiler
+```sh
+npm test
+npm run lint
+npm run build
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+`npm run preview` permet de vérifier la compilation sur le port 4173. Les tests React utilisent jsdom et des réponses HTTP simulées ; les tests d'intégration HTTP de l'API se trouvent dans `../api/test/`.
