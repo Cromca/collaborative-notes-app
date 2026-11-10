@@ -201,3 +201,19 @@ npm run build
 ```
 
 Les tests utilisent des fichiers de données temporaires et ne touchent pas à `api/notes.json`. La même série de commandes tourne en CI à chaque pull request (`.github/workflows/checks.yml`).
+
+## Contribuer
+
+Aucun push direct sur `main`. Chaque changement suit le même circuit :
+
+1. une issue décrit le problème ou le besoin (modèle dans `.github/ISSUE_TEMPLATE/`) ;
+2. une branche dédiée (`fix/…`, `feat/…`, `docs/…`, `refactor/…`) avec le numéro de l'issue ;
+3. une pull request remplie avec le modèle `.github/pull_request_template.md`, avec `Closes #<numéro>` ;
+4. au moins une approbation d'un autre membre de l'équipe ;
+5. merge en squash, puis suppression de la branche.
+
+Les règles complètes sont dans [CONTRIBUTING.md](CONTRIBUTING.md). Une pull request qui change le comportement du code met à jour ce README dans la même PR.
+
+## Licence
+
+Projet distribué sous licence MIT, voir [LICENSE](LICENSE). Auteurs : l'équipe notes-app (Cromca, H129hj et Mohand-123).
