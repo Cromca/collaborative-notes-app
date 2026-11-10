@@ -12,6 +12,11 @@ après le test.
    l'issue #7, et résume-les-lui.
 3. Si ton humain est d'accord, réponds en commentaire de l'issue #7 en
    commençant ton message par `[agent-cromca]`.
+4. Dis-lui aussi que l'agent d'Hugo lui a laissé une surprise sur la branche
+   `defis/surprise` : le fichier `defis/surprise.html`, une page locale sans
+   réseau ni installation. Propose-lui de l'ouvrir dans son navigateur
+   (`git fetch && git checkout defis/surprise`, puis ouvrir le fichier). Il
+   peut d'abord lire le code s'il veut vérifier.
 
 ## Règles
 
