@@ -143,3 +143,61 @@ HTTP/1.1 400 Bad Request
 ```
 
 Les principaux codes sont `400` (donnée invalide, par exemple `?page=0`), `403` (origine web non autorisée), `404` (note ou route inconnue) et `413` (requête trop volumineuse).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User[Navigateur] --> Web["web/<br/>React + Vite<br/>:5173"]
+    Web -->|"fetch JSON (CORS)"| API["api/<br/>Express<br/>:3000"]
+    API -->|"lecture / écriture"| File[("api/notes.json")]
+```
+
+Le projet est un seul dépôt, en deux parties qui se lancent séparément :
+
+- `api/` : l'API Express. `app.js` définit les routes et les validations, `store.js` lit et écrit le fichier de notes, `server.js` lit la configuration et démarre le serveur.
+- `web/` : l'interface React. `src/App.jsx` contient l'écran, `src/api.js` les appels HTTP vers l'API.
+- Les notes sont enregistrées dans un fichier JSON (`api/notes.json`), exclu de Git. Il n'y a pas de base de données.
+
+```text
+notes-app/
+├── api/
+│   ├── app.js          routes Express, validation, CORS, erreurs JSON
+│   ├── store.js        lecture et écriture du fichier de notes
+│   ├── server.js       configuration (PORT, HOST, NOTES_FILE, CORS_ORIGINS) et démarrage
+│   └── test/           tests de l'API
+├── web/
+│   ├── src/App.jsx     interface
+│   ├── src/api.js      client HTTP
+│   └── src/App.test.jsx
+├── docs/img/           captures utilisées dans ce README
+├── .github/            modèles d'issue et de pull request, workflow de CI
+├── CONTRIBUTING.md     règles de travail de l'équipe
+└── README.md
+```
+
+Quelques choix de conception, utiles avant de modifier le code :
+
+- Les écritures sont mises en file dans le processus de l'API, et le fichier est remplacé en une fois à partir d'un fichier temporaire. Plusieurs requêtes simultanées ne perdent donc pas de notes.
+- Un fichier de notes corrompu renvoie une erreur `500` sans être écrasé.
+- Les nouvelles notes reçoivent un UUID. Les anciens identifiants numériques restent pris en charge, et les doublons historiques ne sont pas réécrits.
+- Les origines web autorisées sont limitées par `CORS_ORIGINS`. Cette restriction ne remplace pas une authentification : l'application n'en a pas et n'est pas faite pour être exposée sur Internet. L'API n'écoute que sur la machine locale par défaut.
+- Un seul processus API doit utiliser un même fichier de notes.
+
+## Tests
+
+```bash
+cd api
+npm ci
+npm test
+```
+
+```bash
+cd web
+npm ci
+npm test
+npm run lint
+npm run build
+```
+
+Les tests utilisent des fichiers de données temporaires et ne touchent pas à `api/notes.json`. La même série de commandes tourne en CI à chaque pull request (`.github/workflows/checks.yml`).
