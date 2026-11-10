@@ -19,7 +19,7 @@ git clone https://github.com/Cromca/notes-app.git
 cd notes-app
 ```
 
-Dans un premier terminal, l'API :
+Dans un premier terminal, depuis la racine du dépôt, lancer l'API :
 
 ```bash
 cd api
@@ -29,7 +29,7 @@ npm start
 
 L'API affiche `API sur http://127.0.0.1:3000` et écoute sur http://localhost:3000.
 
-Dans un second terminal, le front :
+Dans un second terminal, ouvert à la racine du dépôt `notes-app`, lancer le front :
 
 ```bash
 cd web
@@ -51,10 +51,17 @@ Toutes les variables sont facultatives.
 | `CORS_ORIGINS` | api | Origines web autorisées, séparées par des virgules, sans chemin. Remplace la liste par défaut ; `*` est refusé | `http://localhost:5173`, `http://127.0.0.1:5173`, `http://localhost:4173`, `http://127.0.0.1:4173` |
 | `VITE_API_URL` | web | Adresse de l'API, lue au démarrage de Vite ou à la compilation | `http://localhost:3000` |
 
-Exemple si Vite démarre sur le port 5177 :
+Exemple si Vite démarre sur le port 5177, à exécuter dans `api/` après avoir arrêté l'API. Sous Bash (Linux, macOS ou Git Bash) :
 
 ```bash
 CORS_ORIGINS=http://localhost:5177,http://127.0.0.1:5177 npm start
+```
+
+Sous PowerShell (Windows) :
+
+```powershell
+$env:CORS_ORIGINS = 'http://localhost:5177,http://127.0.0.1:5177'
+npm start
 ```
 
 ## Usage
@@ -79,7 +86,7 @@ CORS_ORIGINS=http://localhost:5177,http://127.0.0.1:5177 npm start
 | `GET` | `/search?q=<texte>` | Recherche dans tous les titres, sans tenir compte de la casse. `q` ne doit pas être vide |
 | `DELETE` | `/notes/<id>` | Supprime une note : `204`, ou `404` si l'identifiant n'existe pas |
 
-Les exemples ci-dessous ont été exécutés sur une API neuve ; seuls les en-têtes utiles sont reproduits. L'identifiant (`id`) est un UUID généré à la création, le vôtre sera différent.
+Les exemples ci-dessous utilisent Bash (Linux, macOS ou Git Bash sous Windows) et ont été exécutés sur une API neuve ; seuls les en-têtes utiles sont reproduits. L'identifiant (`id`) est un UUID généré à la création, le vôtre sera différent : remplacer celui de l'exemple de suppression par l'identifiant reçu lors de la création.
 
 Créer une note :
 
@@ -184,7 +191,11 @@ Quelques choix de conception, utiles avant de modifier le code :
 - Les origines web autorisées sont limitées par `CORS_ORIGINS`. Cette restriction ne remplace pas une authentification : l'application n'en a pas et n'est pas faite pour être exposée sur Internet. L'API n'écoute que sur la machine locale par défaut.
 - Un seul processus API doit utiliser un même fichier de notes.
 
+Les raisons de ces choix et les alternatives étudiées sont détaillées dans les [décisions d'architecture](docs/adr/README.md) : [stockage JSON (ADR-0001)](docs/adr/0001-stockage-fichier-json.md) et [pagination (ADR-0002)](docs/adr/0002-pagination-par-numero-de-page.md).
+
 ## Tests
+
+Exécuter chaque bloc depuis la racine du dépôt, dans des terminaux distincts (ou revenir à la racine entre les deux).
 
 ```bash
 cd api
@@ -216,4 +227,4 @@ Les règles complètes sont dans [CONTRIBUTING.md](CONTRIBUTING.md). Une pull re
 
 ## Licence
 
-Projet distribué sous licence MIT, voir [LICENSE](LICENSE). Auteurs : l'équipe notes-app (Cromca, H129hj et Mohand-123).
+Aucune licence de distribution n'est définie pour le moment. Le dépôt reste privé ; le choix d'une licence est reporté par l'équipe.
