@@ -6,4 +6,4 @@ Chaque ADR est validé par pull request : il est ouvert en statut « Proposé »
 
 | Numéro | Titre | Statut |
 | --- | --- | --- |
-| [0001](0001-stockage-fichier-json.md) | Stocker les notes dans un fichier JSON | Proposé |
+| [0001](0001-stockage-fichier-json.md) | Stocker les notes dans un fichier JSON | Accepté |

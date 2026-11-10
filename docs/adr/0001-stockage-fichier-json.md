@@ -1,8 +1,8 @@
 # ADR-0001 : Stocker les notes dans un fichier JSON
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-11-10
-- **Décideurs** : équipe notes-app (Cromca, H129hj, Mohand-123), à valider en review
+- **Validation** : proposition de Mohand-123, revue et intégration par Cromca dans la PR #22.
 
 ## Contexte
 
@@ -23,10 +23,11 @@ Nous stockons les notes dans un fichier JSON, `api/notes.json` (chemin modifiabl
 
 ## Conséquences
 
-- ✅ Installation sans dépendance : le fichier est créé au premier ajout, et le README tient en quelques commandes.
+- ✅ Stockage sans dépendance supplémentaire ni service externe : le fichier est créé au premier ajout, et le README tient en quelques commandes.
 - ✅ Données faciles à inspecter, à copier et à réinitialiser pendant le développement ; les tests utilisent simplement un fichier temporaire.
 - ✅ Les écritures en file et le remplacement atomique du fichier évitent de perdre des notes lors d'écritures simultanées, et un fichier corrompu n'est jamais écrasé (l'API répond `500`).
-- ⚠️ Tout le fichier est lu et analysé à chaque requête, y compris pour `GET /notes` et `/search` : inadapté au-delà de quelques milliers de notes.
+- ⚠️ Chaque opération de lecture ou d'écriture des notes charge et analyse le fichier entier, y compris `GET /notes` et `/search`. Le coût augmente avec le nombre et la taille des notes ; aucun seuil de capacité n'a été mesuré.
 - ⚠️ Un seul processus API doit utiliser un même fichier. Deux processus, ou un déploiement avec plusieurs instances, peuvent s'écraser mutuellement.
 - ⚠️ Pas de requête indexée : la recherche et la pagination se font en parcourant le tableau en mémoire (voir ADR-0002).
-- ⚠️ Cette décision est à réévaluer si l'application est déployée pour plusieurs utilisateurs ou si le volume dépasse quelques milliers de notes : l'option SQLite serait alors la suite logique, avec un nouvel ADR qui remplacerait celui-ci.
+- ⚠️ Le remplacement atomique évite un fichier partiellement écrit pendant le fonctionnement normal ; le code ne force pas la synchronisation sur disque et ne garantit pas la conservation du dernier ajout lors d'une coupure de courant.
+- ⚠️ Cette décision est à réévaluer si l'application est déployée pour plusieurs utilisateurs ou si les mesures de latence et de mémoire deviennent insatisfaisantes : l'option SQLite sera alors à étudier, avec un nouvel ADR qui remplacerait celui-ci.
