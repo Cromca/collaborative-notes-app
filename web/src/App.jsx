@@ -6,11 +6,12 @@ export default function App() {
   const [t, setT] = useState("");
   const [b, setB] = useState("");
 
+  // [] : on charge la liste une seule fois, au premier affichage
   useEffect(() => {
     fetch("http://localhost:3000/notes")
       .then((r) => r.json())
       .then((d) => setNotes(d));
-  });
+  }, []);
 
   function add() {
     fetch("http://localhost:3000/notes", {
