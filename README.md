@@ -79,7 +79,7 @@ CORS_ORIGINS=http://localhost:5177,http://127.0.0.1:5177 npm start
 | `GET` | `/search?q=<texte>` | Recherche dans tous les titres, sans tenir compte de la casse. `q` ne doit pas être vide |
 | `DELETE` | `/notes/<id>` | Supprime une note : `204`, ou `404` si l'identifiant n'existe pas |
 
-Les exemples ci-dessous ont été exécutés sur une API neuve. L'identifiant (`id`) est un UUID généré à la création.
+Les exemples ci-dessous ont été exécutés sur une API neuve ; seuls les en-têtes utiles sont reproduits. L'identifiant (`id`) est un UUID généré à la création, le vôtre sera différent.
 
 Créer une note :
 
