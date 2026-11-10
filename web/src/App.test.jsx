@@ -115,4 +115,22 @@ describe('notes application', () => {
     await screen.findByText('Aucune note à afficher.');
     await waitFor(()=>expect(screen.queryByRole('alert')).toBeNull());
   });
+
+  it('uses the server insertion count when saving before the initial list arrives', async () => {
+    const initial=deferred();
+    const note={id:'new',title:'Nouvelle note',body:''};
+    const fetch=vi.fn().mockImplementation((url,options)=> {
+      if(options?.method==='POST') return Promise.resolve(json(note,201,11));
+      if(url.endsWith('page=2')) return Promise.resolve(json([note],200,11));
+      return initial.promise;
+    });
+    vi.stubGlobal('fetch',fetch);
+    render(<App />);
+    await userEvent.type(screen.getByLabelText('Titre'),'Nouvelle note');
+    await userEvent.click(screen.getByRole('button',{name:'Ajouter'}));
+    await screen.findByRole('heading',{name:'Nouvelle note'});
+    expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
+    await act(async()=>initial.resolve(json([{id:'old',title:'Ancienne réponse'}],200,10)));
+    expect(screen.queryByText('Ancienne réponse')).toBeNull();
+  });
 });

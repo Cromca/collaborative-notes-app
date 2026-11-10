@@ -2,11 +2,32 @@ import express from 'express';
 import cors from 'cors';
 import { createNoteStore } from './store.js';
 
-export function createApp({ file }) {
+const LOCAL_ORIGINS = [
+  'http://localhost:5173', 'http://127.0.0.1:5173',
+  'http://localhost:4173', 'http://127.0.0.1:4173',
+];
+
+export function createApp({ file, allowedOrigins = LOCAL_ORIGINS }) {
+  for (const origin of allowedOrigins) {
+    let parsed;
+    try { parsed = new URL(origin); } catch { throw new Error(`Origine CORS invalide : ${origin}`); }
+    if (!['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin) {
+      throw new Error(`Origine CORS invalide : ${origin}`);
+    }
+  }
+  const trustedOrigins = new Set(allowedOrigins);
   const app = express();
   const store = createNoteStore(file);
   app.disable('x-powered-by');
-  app.use(cors({ exposedHeaders: ['X-Total-Count'] }));
+  app.use(cors({
+    exposedHeaders: ['X-Total-Count'],
+    origin(origin, callback) {
+      if (origin === undefined || trustedOrigins.has(origin)) return callback(null, true);
+      const error = new Error('Cette origine web n’est pas autorisée.');
+      error.code = 'CORS_FORBIDDEN';
+      callback(error);
+    },
+  }));
   app.use(express.json({ limit: '100kb' }));
 
   app.post('/notes', async (req, res) => {
@@ -21,9 +42,10 @@ export function createApp({ file }) {
     if (fields.tag !== undefined && (typeof fields.tag !== 'string' || fields.tag.trim().length > 50)) {
       return res.status(400).json({ error: 'Le tag doit être un texte de 50 caractères maximum.' });
     }
-    const note = await store.create({
+    const { note, total } = await store.create({
       title: fields.title.trim(), body: fields.body ?? '', tag: fields.tag?.trim() ?? '',
     });
+    res.set('X-Total-Count', String(total));
     res.status(201).json(note);
   });
 
@@ -67,6 +89,9 @@ export function createApp({ file }) {
 
   app.use((_req, res) => res.status(404).json({ error: 'Route introuvable.' }));
   app.use((error, _req, res, _next) => {
+    if (error.code === 'CORS_FORBIDDEN') {
+      return res.status(403).json({ error: error.message });
+    }
     if (error.type === 'entity.parse.failed') {
       return res.status(400).json({ error: 'Le corps de la requête doit être du JSON valide.' });
     }

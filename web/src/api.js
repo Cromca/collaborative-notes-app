@@ -23,8 +23,9 @@ export async function getNotes({ page, query, signal }) {
 }
 
 export async function createNote(note) {
-  const { data } = await request('/notes', {
+  const { data, headers } = await request('/notes', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(note),
   });
-  return data;
+  const total = Number(headers.get('X-Total-Count'));
+  return { note: data, total: Number.isSafeInteger(total) && total > 0 ? total : null };
 }

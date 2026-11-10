@@ -49,7 +49,7 @@ export function createNoteStore(file) {
       return update(notes => {
         const note = { id: randomUUID(), ...fields };
         notes.push(note);
-        return { changed: true, value: note };
+        return { changed: true, value: { note, total: notes.length } };
       });
     },
     remove(id) {

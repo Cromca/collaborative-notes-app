@@ -5,11 +5,11 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createApp } from '../app.js';
 
-async function setup(t, initialNotes) {
+async function setup(t, initialNotes, options = {}) {
   const directory = await mkdtemp(path.join(tmpdir(), 'notes-api-test-'));
   const file = path.join(directory, 'notes.json');
   if (initialNotes !== undefined) await writeFile(file, JSON.stringify(initialNotes));
-  const server = createApp({ file }).listen(0, '127.0.0.1');
+  const server = createApp({ file, ...options }).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   t.after(async () => {
     await new Promise(resolve => server.close(resolve));
@@ -96,6 +96,7 @@ test('tags are filtered strictly and fields are normalized', async t => {
   const { create, request } = await setup(t);
   const response = await create({ title:'  Alpha  ',body:'<b>literal</b>',tag:' audit ' });
   assert.equal(response.status,201);
+  assert.equal(response.headers.get('X-Total-Count'),'1');
   const note = await response.json();
   assert.equal(note.title,'Alpha');
   assert.equal(note.tag,'audit');
@@ -125,4 +126,41 @@ test('corrupt storage returns safe JSON, remains intact and can recover', async 
   assert.equal(await readFile(file,'utf8'),'{broken');
   await writeFile(file,'[]');
   assert.equal((await create({title:'Recovered'})).status,201);
+});
+
+test('untrusted browser origins cannot read or change local notes', async t => {
+  const { request, file } = await setup(t, []);
+  for (const origin of ['https://external.example', 'http://localhost:5173.evil.example', 'null']) {
+    const response = await request('/notes', {headers:{Origin:origin}});
+    assert.equal(response.status,403,origin);
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'),null);
+    assert.equal(typeof (await response.json()).error,'string');
+  }
+  const blockedPost=await request('/notes',{
+    method:'POST',headers:{Origin:'https://external.example','Content-Type':'application/json'},
+    body:JSON.stringify({title:'Untrusted'}),
+  });
+  assert.equal(blockedPost.status,403);
+  assert.deepEqual(JSON.parse(await readFile(file,'utf8')),[]);
+  const blockedPreflight=await request('/notes',{
+    method:'OPTIONS',headers:{Origin:'https://external.example','Access-Control-Request-Method':'POST'},
+  });
+  assert.equal(blockedPreflight.status,403);
+});
+
+test('trusted local origins, configured origins and CLI requests remain supported', async t => {
+  const {request}=await setup(t,[]);
+  for (const origin of ['http://localhost:5173','http://127.0.0.1:5173','http://localhost:4173','http://127.0.0.1:4173']) {
+    const response=await request('/notes',{headers:{Origin:origin}});
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'),origin);
+    assert.match(response.headers.get('Access-Control-Expose-Headers'),/X-Total-Count/i);
+    const preflight=await request('/notes',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'}});
+    assert.equal(preflight.status,204);
+  }
+  assert.equal((await request('/notes')).status,200);
+  const custom=await setup(t,[],{allowedOrigins:['http://localhost:5177']});
+  assert.equal((await custom.request('/notes',{headers:{Origin:'http://localhost:5177'}})).status,200);
+  assert.equal((await custom.request('/notes',{headers:{Origin:'http://localhost:5173'}})).status,403);
+  assert.throws(()=>createApp({file:'unused',allowedOrigins:['*']}),/origin/i);
 });

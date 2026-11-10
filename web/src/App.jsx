@@ -49,12 +49,12 @@ export default function App() {
     submissionLock.current = true;
     setSubmitting(true);
     try {
-      await createNote({ title: title.trim(), body, tag: tag.trim() });
+      const created = await createNote({ title: title.trim(), body, tag: tag.trim() });
       setTitle('');
       setBody('');
       setTag('');
       setNotice('Note créée.');
-      if (!query) setPage(Math.floor(total / 10) + 1);
+      if (!query) setPage(created.total === null ? Math.floor(total / 10) + 1 : Math.ceil(created.total / 10));
       setRevision(value => value + 1);
     } catch (error) {
       setFormError(error.message);
