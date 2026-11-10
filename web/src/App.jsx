@@ -26,7 +26,7 @@ export default function App() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const key = makeRequestKey(page, query, revision);
+    const effectKey = makeRequestKey(page, query, revision);
     let active = true;
     getNotes({ page, query, signal: controller.signal })
       .then(result => {
@@ -39,7 +39,7 @@ export default function App() {
       .catch(error => {
         if (active && error.name !== 'AbortError') setListError(error.message);
       })
-      .finally(() => { if (active) setSettledRequest(key); });
+      .finally(() => { if (active) setSettledRequest(effectKey); });
     return () => { active = false; controller.abort(); };
   }, [page, query, revision]);
 
