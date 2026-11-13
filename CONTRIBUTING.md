@@ -1,6 +1,6 @@
 # Contribuer à notes-app
 
-Ce fichier décrit ce que l'équipe fait vraiment depuis le début du module. Qui fait quoi et où trouver chaque information : [docs/equipe.md](docs/equipe.md).
+Ce fichier décrit ce que l'équipe fait vraiment depuis le début du module. Qui fait quoi et où trouver chaque information : page Wiki [Qui fait quoi](https://github.com/Cromca/collaborative-notes-app/wiki/Qui-fait-quoi).
 
 ## Règle de l'équipe : main est protégée
 
