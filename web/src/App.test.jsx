@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor, act } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
@@ -12,7 +12,14 @@ function deferred() {
   const promise = new Promise(done => { resolve = done; });
   return {promise,resolve};
 }
-afterEach(() => {cleanup();vi.unstubAllGlobals();});
+afterEach(() => {
+  cleanup();
+  if (vi.isFakeTimers()) {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  }
+  vi.unstubAllGlobals();
+});
 
 describe('notes application', () => {
   it('does not refetch on every render, including StrictMode and form edits', async () => {
@@ -90,16 +97,68 @@ describe('notes application', () => {
     expect(screen.queryByRole('navigation')).toBeNull();
   });
 
+  it('searches once after a pause in typing', async () => {
+    const fetch=vi.fn().mockResolvedValue(json([]));
+    vi.stubGlobal('fetch',fetch);
+    render(<App />);
+    await screen.findByText('Aucune note à afficher.');
+    vi.useFakeTimers();
+    const search = screen.getByLabelText('Rechercher dans les titres');
+    fireEvent.change(search, {target: {value: 'no'}});
+    await act(async () => { await vi.advanceTimersByTimeAsync(200); });
+    fireEvent.change(search, {target: {value: 'notes'}});
+    await act(async () => { await vi.advanceTimersByTimeAsync(299); });
+    expect(fetch.mock.calls.filter(([url]) => url.includes('/search?'))).toHaveLength(0);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(fetch.mock.calls.filter(([url]) => url.includes('/search?'))).toHaveLength(1);
+    expect(fetch.mock.calls.find(([url]) => url.includes('/search?'))[0]).toContain('q=notes');
+  });
+
+  it('keeps pagination hidden until the full list returns after clearing a search', async () => {
+    const pending = deferred();
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(json([{id: 'first', title: 'Première'}], 200, 12))
+      .mockResolvedValueOnce(json([{id: 'match', title: 'Hors page'}]))
+      .mockImplementationOnce(() => pending.promise);
+    vi.stubGlobal('fetch', fetch);
+    render(<App />);
+    await screen.findByText('Page 1 sur 2');
+    vi.useFakeTimers();
+    const search = screen.getByLabelText('Rechercher dans les titres');
+    fireEvent.change(search, {target: {value: 'Hors'}});
+    await act(async () => { await vi.advanceTimersByTimeAsync(300); });
+    expect(screen.getByText('Hors page')).toBeTruthy();
+    expect(screen.queryByRole('navigation')).toBeNull();
+
+    fireEvent.change(search, {target: {value: ''}});
+    expect(screen.queryByRole('navigation')).toBeNull();
+    await act(async () => { await vi.advanceTimersByTimeAsync(299); });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('navigation')).toBeNull();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch.mock.calls.at(-1)[0]).toContain('/notes?page=1');
+    expect(screen.queryByRole('navigation')).toBeNull();
+
+    await act(async () => { pending.resolve(json([{id: 'first', title: 'Première'}], 200, 12)); });
+    expect(screen.getByText('Page 1 sur 2')).toBeTruthy();
+    expect(screen.getByRole('button', {name: 'Suivant'}).disabled).toBe(false);
+  });
+
   it('ignores a stale search response that arrives after a more recent response', async () => {
     const old=deferred();
-    vi.stubGlobal('fetch',vi.fn().mockImplementation(url=> {
+    const fetch=vi.fn().mockImplementation(url=> {
       if(url.endsWith('q=a')) return old.promise;
       if(url.endsWith('q=ab')) return Promise.resolve(json([{id:'recent',title:'Récent'}]));
       return Promise.resolve(json([]));
-    }));
+    });
+    vi.stubGlobal('fetch',fetch);
     render(<App />);
     await screen.findByText('Aucune note à afficher.');
-    await userEvent.type(screen.getByLabelText('Rechercher dans les titres'),'ab');
+    const search = screen.getByLabelText('Rechercher dans les titres');
+    await userEvent.type(search,'a');
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => url.endsWith('q=a'))).toBe(true));
+    await userEvent.type(search,'b');
     await screen.findByText('Récent');
     await act(async()=>old.resolve(json([{id:'old',title:'Périmé'}])));
     expect(screen.queryByText('Périmé')).toBeNull();
