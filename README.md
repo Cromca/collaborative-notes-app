@@ -200,7 +200,7 @@ Le projet contient deux parties indépendantes, chacune avec son `package.json` 
 └── .github/      Modèles d'issue et de PR, CI
 ```
 
-Les décisions d'architecture (stockage, pagination…) seront documentées dans `docs/adr/`.
+Les décisions d'architecture (stockage des notes, pagination…) sont documentées dans [docs/adr/](docs/adr/) : contexte, options envisagées, décision et conséquences.
 
 ## Tests
 

@@ -1,6 +1,6 @@
 # ADR-0002 : Paginer GET /notes par numéro de page
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-11-13
 - **Auteur** : Hugo
 - **Issue** : #34
