@@ -35,7 +35,7 @@ L'API renvoie les 10 notes qui suivent un identifiant donné, et le curseur de l
 - ➕ Pas de doublon ni de note sautée quand la liste change
 - ➕ Reste rapide sur de très grandes listes avec une base de données
 - ➖ Pas d'accès direct à la page 4, ni de « page X sur Y » : seulement Suivant (et Précédent si on garde un historique de curseurs)
-- ➖ Les identifiants sont des UUID non triés : il faudrait un ordre stable (date de création) en plus
+- ➖ Il faut un curseur qui résiste aux suppressions : les notes gardent l'ordre d'insertion du tableau (les nouvelles sont ajoutées à la fin), donc l'identifiant de la dernière note vue peut servir de curseur sans ordre supplémentaire, mais si cette note est supprimée entre deux requêtes, le curseur ne retrouve plus sa position
 - ➖ Plus compliqué à coder et à tester pour un gain nul avec quelques centaines de notes
 
 ### Option C : pas de pagination côté API
@@ -54,9 +54,9 @@ On garde **l'option A, la pagination par numéro de page** :
 - **10 notes par page**, valeur fixe (pas de paramètre `size` pour l'instant) ;
 - `page` qui n'est pas un entier ≥ 1 → **400** avec un message d'erreur ;
 - nombre total de notes dans l'en-tête **`X-Total-Count`**, exposé au navigateur par CORS ;
-- `POST /notes` renvoie aussi `X-Total-Count` : la position de la nouvelle note, qui permet au front d'aller sur la bonne page.
+- `POST /notes` renvoie aussi `X-Total-Count`, le nombre total de notes après la création : comme la nouvelle note est ajoutée en dernier, c'est aussi sa position, ce qui permet au front d'aller sur la bonne page.
 
-`GET /search` et `GET /notes/by-tag/:tag` ne sont pas paginés.
+`GET /search` et `GET /notes/by-tag/:tag` ne sont pas paginés. Une page au-delà de la dernière n'est pas une erreur : l'API répond `200` avec un tableau vide et le bon `X-Total-Count`, c'est le front qui revient alors à la page 1.
 
 ## Conséquences
 
