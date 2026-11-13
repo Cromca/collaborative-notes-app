@@ -7,6 +7,7 @@ const makeRequestKey = (page, query, revision) => JSON.stringify([page, query, r
 export default function App() {
   const [notes, setNotes] = useState([]);
   const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tag, setTag] = useState('');
@@ -19,10 +20,19 @@ export default function App() {
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState('');
   const submissionLock = useRef(false);
-  const query = search.trim();
+  const rawQuery = search.trim();
   const requestKey = makeRequestKey(page, query, revision);
-  const loading = settledRequest !== requestKey;
+  const loading = rawQuery !== query || settledRequest !== requestKey;
   const lastPage = Math.max(1, Math.ceil(total / 10));
+
+  useEffect(() => {
+    if (rawQuery === query) return undefined;
+    const timer = setTimeout(() => {
+      setPage(1);
+      setQuery(rawQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [rawQuery, query]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -57,7 +67,7 @@ export default function App() {
       setBody('');
       setTag('');
       setNotice('Note créée.');
-      if (!query) setPage(created.total === null ? Math.floor(total / 10) + 1 : Math.ceil(created.total / 10));
+      if (!rawQuery) setPage(created.total === null ? Math.floor(total / 10) + 1 : Math.ceil(created.total / 10));
       setRevision(value => value + 1);
     } catch (error) {
       setFormError(error.message);
@@ -87,7 +97,7 @@ export default function App() {
       <section aria-labelledby="notes-heading">
         <h2 id="notes-heading">Vos notes</h2>
         <label htmlFor="note-search">Rechercher dans les titres</label>
-        <input id="note-search" type="search" value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} />
+        <input id="note-search" type="search" value={search} onChange={event => setSearch(event.target.value)} />
         {loading && <p role="status">Chargement…</p>}
         {!loading && listError && <div role="alert"><p>{listError}</p><button onClick={() => setRevision(value => value + 1)}>Réessayer</button></div>}
         {!loading && !listError && <>
@@ -105,7 +115,7 @@ export default function App() {
             ))}
           </ul>
         </>}
-        {!query && <nav aria-label="Pagination des notes">
+        {!query && !loading && <nav aria-label="Pagination des notes">
           <button disabled={loading || page <= 1} onClick={() => setPage(value => value - 1)}>Précédent</button>
           <span>Page {page} sur {lastPage}</span>
           <button disabled={loading || page >= lastPage} onClick={() => setPage(value => value + 1)}>Suivant</button>
