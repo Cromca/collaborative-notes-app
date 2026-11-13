@@ -6,5 +6,6 @@ Un ADR passe par une pull request relue. Son statut passe de **Proposé** à **A
 | Numéro | Titre | Statut |
 | --- | --- | --- |
 | [ADR-0001](0001-stockage-des-notes.md) | Stocker les notes dans un fichier JSON | Accepté |
+| [ADR-0002](0002-pagination-get-notes.md) | Paginer GET /notes par numéro de page | Accepté |
 
 Pour en écrire un nouveau : copier le format d'un ADR existant, prendre le numéro suivant, ajouter la ligne dans ce tableau.
