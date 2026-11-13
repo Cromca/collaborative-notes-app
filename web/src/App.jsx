@@ -115,7 +115,7 @@ export default function App() {
             ))}
           </ul>
         </>}
-        {!rawQuery && <nav aria-label="Pagination des notes">
+        {!query && !loading && <nav aria-label="Pagination des notes">
           <button disabled={loading || page <= 1} onClick={() => setPage(value => value - 1)}>Précédent</button>
           <span>Page {page} sur {lastPage}</span>
           <button disabled={loading || page >= lastPage} onClick={() => setPage(value => value + 1)}>Suivant</button>
