@@ -9,7 +9,7 @@ assignees: ""
 <!-- Avant de joindre des logs ou des captures : masque les secrets (tokens, mots de passe, variables d'environnement) et les données personnelles. -->
 
 ## Contexte
-- Commit ou branche : <!-- ex. `main` à `c291c87` -->
+- Commit testé (SHA) : <!-- `git rev-parse --short HEAD` ; branche facultative en complément -->
 - Partie concernée : <!-- api/, web/ ou les deux -->
 - Environnement : <!-- système, version de Node.js, navigateur si front -->
 - Lancement : <!-- commandes utilisées, ex. `cd api && npm start`, variables PORT / VITE_API_URL si modifiées -->

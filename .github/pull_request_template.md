@@ -14,7 +14,7 @@ Closes #
 -
 
 ## Checklist
-- [ ] Commandes de vérification lancées, résultats indiqués ci-dessus
+- [ ] Vérifications effectuées (tests ou relecture documentaire), résultats indiqués ci-dessus
 - [ ] Documentation mise à jour si le comportement change
 - [ ] Secrets et données personnelles masqués dans les logs et captures
 - [ ] PR courte et centrée sur un seul sujet
