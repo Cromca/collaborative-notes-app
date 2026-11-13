@@ -4,10 +4,12 @@ Ce fichier décrit ce que l'équipe fait vraiment depuis le début du module. Qu
 
 ## Règle de l'équipe : main est protégée
 
-On n'a pas pu activer la protection de branche sur ce dépôt, donc on l'applique nous-mêmes :
+La protection de branche est active sur `main` et GitHub l'applique à tout le monde, administrateurs compris :
 
-- Pas de push direct sur `main` (sauf l'import initial, déjà fait).
-- Pas de `git push --force` sur `main`.
+- Tout changement passe par une pull request : pas de push direct ni de `git push --force` sur `main`.
+- Au moins 1 approbation est nécessaire, et une approbation est annulée si de nouveaux commits arrivent ensuite.
+- Le check de tests de la CI doit être vert.
+- L'historique de `main` reste linéaire (Squash and merge).
 
 ## Workflow
 
@@ -17,7 +19,7 @@ On n'a pas pu activer la protection de branche sur ce dépôt, donc on l'appliqu
    Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `revert`.
 3. **Commits au format Conventional Commits**, avec la partie concernée quand il y en a une :
    `fix(api): corrige le décalage de pagination sur GET /notes (#1)`, `fix(web): …`, `docs: …`.
-4. **Pull request vers `main`** avec le modèle rempli (Contexte, Changements, Impact, Comment tester, Checklist) et `Closes #n`.
+4. **Pull request vers `main`** avec le modèle rempli (Contexte, Changements, Impact, Vérification, Checklist ; pour un changement de doc seule, la relecture faite tient lieu de vérification) et `Closes #n`.
 5. **La CI doit être verte** : le workflow « Vérifications » lance les tests de l'API, les tests du front, le lint et le build.
 
 ## Review
