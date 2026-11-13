@@ -90,16 +90,30 @@ describe('notes application', () => {
     expect(screen.queryByRole('navigation')).toBeNull();
   });
 
+  it('searches once after a pause in typing', async () => {
+    const fetch=vi.fn().mockResolvedValue(json([]));
+    vi.stubGlobal('fetch',fetch);
+    render(<App />);
+    await screen.findByText('Aucune note à afficher.');
+    await userEvent.type(screen.getByLabelText('Rechercher dans les titres'),'notes');
+    await waitFor(() => expect(fetch.mock.calls.filter(([url]) => url.includes('/search?'))).toHaveLength(1));
+    expect(fetch.mock.calls.find(([url]) => url.includes('/search?'))[0]).toContain('q=notes');
+  });
+
   it('ignores a stale search response that arrives after a more recent response', async () => {
     const old=deferred();
-    vi.stubGlobal('fetch',vi.fn().mockImplementation(url=> {
+    const fetch=vi.fn().mockImplementation(url=> {
       if(url.endsWith('q=a')) return old.promise;
       if(url.endsWith('q=ab')) return Promise.resolve(json([{id:'recent',title:'Récent'}]));
       return Promise.resolve(json([]));
-    }));
+    });
+    vi.stubGlobal('fetch',fetch);
     render(<App />);
     await screen.findByText('Aucune note à afficher.');
-    await userEvent.type(screen.getByLabelText('Rechercher dans les titres'),'ab');
+    const search = screen.getByLabelText('Rechercher dans les titres');
+    await userEvent.type(search,'a');
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => url.endsWith('q=a'))).toBe(true));
+    await userEvent.type(search,'b');
     await screen.findByText('Récent');
     await act(async()=>old.resolve(json([{id:'old',title:'Périmé'}])));
     expect(screen.queryByText('Périmé')).toBeNull();
