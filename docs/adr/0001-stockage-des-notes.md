@@ -1,6 +1,6 @@
 # ADR-0001 : Stocker les notes dans un fichier JSON
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-11-13
 - **Auteur** : Hugo
 - **Issue** : #33
