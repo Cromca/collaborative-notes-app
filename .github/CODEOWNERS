@@ -2,8 +2,8 @@
 # Chaque partie a deux propriétaires : GitHub ne demande jamais la review de l'auteur de la PR,
 # il reste donc toujours quelqu'un d'autre à solliciter.
 
-# Par défaut : le propriétaire du dépôt
-*                 @Cromca
+# Par défaut : le propriétaire du dépôt et Hugo
+*                 @Cromca @H129hj
 
 # L'API
 /api/             @Cromca @Mohand-123

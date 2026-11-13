@@ -31,7 +31,7 @@ On n'a pas pu activer la protection de branche sur ce dépôt, donc on l'appliqu
 ## Merge
 
 - **Squash and merge** : un commit par PR sur `main`.
-- Une fois la PR approuvée et la CI verte, l'auteur ou Cromca (propriétaire du dépôt) merge, puis supprime la branche.
+- Une fois la PR approuvée sur GitHub (un accord oral ne compte pas) et la CI verte, l'auteur ou Cromca (propriétaire du dépôt) merge, puis supprime la branche.
 - Pour annuler un changement déjà mergé : une issue, puis une PR de revert (exemple : #25, #26, #27). Jamais de réécriture de l'historique de `main`.
 
 ## Documentation

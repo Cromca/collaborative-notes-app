@@ -14,6 +14,8 @@ Le Wiki GitHub n'est pas activé sur ce dépôt (seul le propriétaire peut l'ac
 
 R : réalise · A : valide, un seul par ligne · C : consulté avant · I : informé après
 
+La matrice sépare volontairement celui qui fait (R) de celui qui valide (A) : sur l'API, c'est Mohand qui réalise les correctifs et Quentin, qui connaît le mieux l'API, qui valide ; sur le front, Hugo réalise et Mohand valide. Le tableau des rôles ci-dessus dit sur quoi chacun travaille le plus, la matrice dit qui a le dernier mot. Ces rôles sont une proposition : chacun confirme les siens dans la PR avant le merge.
+
 | Livrable | Quentin (@Cromca) | Mohand (@Mohand-123) | Hugo (@H129hj) | Formateur |
 | --- | --- | --- | --- | --- |
 | Nouvelle route ou correctif de l'API | A | R | C | I |
