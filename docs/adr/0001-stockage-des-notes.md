@@ -36,7 +36,7 @@ Une base dans un seul fichier, avec du SQL.
 
 - ➕ Vraies requêtes (filtre par tag, recherche, pagination en SQL), index possibles
 - ➕ Transactions : plusieurs processus peuvent écrire sans corrompre la base
-- ➖ Soit une dépendance native de plus (`better-sqlite3`), dont l'installation peut échouer selon le poste et la version de Node.js ; soit le module intégré `node:sqlite` (disponible depuis Node.js 22.5.0, testé sur la v24.13.1), sans dépendance à installer mais encore classé « release candidate » et qui affiche un avertissement expérimental
+- ➖ Soit une dépendance native de plus (`better-sqlite3`), dont l'installation peut échouer selon le poste et la version de Node.js ; soit le module intégré `node:sqlite` (disponible depuis Node.js 22.5.0, testé sur la v24.13.1), sans dépendance à installer mais encore jeune : il affiche un avertissement expérimental et sa documentation le classe en « 1.1 — Active development » en v24.13.1, puis en « 1.2 — Release candidate » à partir de la v24.15.0 ([doc v24.13.1](https://nodejs.org/download/release/v24.13.1/docs/api/sqlite.html), [doc v24.15.0](https://nodejs.org/download/release/v24.15.0/docs/api/sqlite.html))
 - ➖ Un schéma et des migrations à maintenir
 - ➖ Fichier binaire : on ne peut plus le lire ou le corriger à la main
 
