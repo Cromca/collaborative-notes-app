@@ -74,7 +74,12 @@ export default function App() {
       setBody('');
       setTag('');
       setNotice('Note créée.');
-      if (!rawQuery) setPage(created.total === null ? Math.floor(total / 10) + 1 : Math.ceil(created.total / 10));
+      if (!rawQuery) {
+        // On met le total à jour en même temps que la page, sinon la barre afficherait « Page 2 sur 1 » pendant le chargement.
+        const newTotal = created.total ?? total + 1;
+        if (totalQuery === '') setTotal(newTotal);
+        setPage(Math.ceil(newTotal / 10));
+      }
       setRevision(value => value + 1);
     } catch (error) {
       setFormError(error.message);

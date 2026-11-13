@@ -160,12 +160,34 @@ describe('notes application', () => {
     expect(screen.getByRole('navigation')).toBeTruthy();
     expect(document.activeElement).toBe(next);
     expect(next.getAttribute('aria-disabled')).toBe('true');
-    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard('{Enter} ');
+    await userEvent.click(next);
     expect(fetch).toHaveBeenCalledTimes(2);
 
     await act(async () => { pending.resolve(json([{id: 'last', title: 'Dernière'}], 200, 12)); });
     expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
     expect(document.activeElement).toBe(next);
+  });
+
+  it('keeps a consistent page count while the page of a new note loads', async () => {
+    const pending = deferred();
+    const fetch = vi.fn().mockImplementation((url, options) => {
+      if (options?.method === 'POST') return Promise.resolve(json({id: 'new', title: 'Onzième'}, 201, 11));
+      if (url.endsWith('page=2')) return pending.promise;
+      return Promise.resolve(json([{id: 'first', title: 'Première'}], 200, 10));
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(<App />);
+    await screen.findByText('Page 1 sur 1');
+    await userEvent.type(screen.getByLabelText('Titre'), 'Onzième');
+    await userEvent.click(screen.getByRole('button', {name: 'Ajouter'}));
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => url.endsWith('page=2'))).toBe(true));
+    expect(screen.queryByText('Page 2 sur 1')).toBeNull();
+    expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
+
+    await act(async () => { pending.resolve(json([{id: 'new', title: 'Onzième'}], 200, 11)); });
+    expect(screen.getByText('Onzième')).toBeTruthy();
+    expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
   });
 
   it('ignores a stale search response that arrives after a more recent response', async () => {
