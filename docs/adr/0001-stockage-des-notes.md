@@ -36,7 +36,7 @@ Une base dans un seul fichier, avec du SQL.
 
 - ➕ Vraies requêtes (filtre par tag, recherche, pagination en SQL), index possibles
 - ➕ Transactions : plusieurs processus peuvent écrire sans corrompre la base
-- ➖ Une dépendance native de plus (`better-sqlite3`), dont l'installation peut échouer selon le poste et la version de Node.js
+- ➖ Soit une dépendance native de plus (`better-sqlite3`), dont l'installation peut échouer selon le poste et la version de Node.js ; soit le module intégré `node:sqlite` (disponible depuis Node.js 22.5.0, testé sur la v24.13.1), sans dépendance à installer mais encore classé « release candidate » et qui affiche un avertissement expérimental
 - ➖ Un schéma et des migrations à maintenir
 - ➖ Fichier binaire : on ne peut plus le lire ou le corriger à la main
 
@@ -68,8 +68,20 @@ Négatives :
 - **Une seule instance de l'API par fichier.** Lancer deux API sur le même `notes.json` peut faire perdre des notes : c'est écrit dans le README.
 - Les performances baissent avec le volume : chaque requête relit tout le fichier.
 - Pas de sauvegarde ni d'historique : si `notes.json` est supprimé, les notes sont perdues (le fichier est exclu de Git).
+- Le remplacement du fichier est atomique, mais le code ne force pas l'écriture sur disque (pas de `fsync`) : après une coupure de courant ou un arrêt brutal, le dernier ajout peut être perdu.
 - Filtre par tag, recherche et pagination sont codés à la main en JavaScript, au lieu d'être faits par la base.
 
 ## Quand revoir cette décision
 
-Si l'application doit gérer plusieurs utilisateurs, tourner sur un serveur partagé ou dépasser quelques milliers de notes, passer à SQLite (option B) et écrire un nouvel ADR qui remplace celui-ci.
+Si l'application doit gérer plusieurs utilisateurs ou tourner sur un serveur partagé, ou si la latence devient gênante, passer à SQLite (option B) et écrire un nouvel ADR qui remplace celui-ci.
+
+Mesure faite par Mohand sur l'API actuelle (Node.js 24.13.1, Windows, fichier local, notes d'environ 300 octets, médiane de 5 requêtes) :
+
+| Notes | Fichier | `GET /notes?page=1` | `GET /search` | `POST /notes` |
+| --- | --- | --- | --- | --- |
+| 1 000 | 0,3 Mo | 3 ms | 3 ms | 6 ms |
+| 5 000 | 1,4 Mo | 8 ms | 6 ms | 17 ms |
+| 20 000 | 5,8 Mo | 32 ms | 36 ms | 77 ms |
+| 50 000 | 14,7 Mo | 81 ms | 79 ms | 150 ms |
+
+Jusqu'à quelques milliers de notes, la latence reste négligeable. Elle devient perceptible vers 50 000 notes, surtout en écriture, puisque chaque ajout relit et réécrit tout le fichier.
