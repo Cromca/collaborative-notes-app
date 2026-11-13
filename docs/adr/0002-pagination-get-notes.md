@@ -26,13 +26,13 @@ L'API découpe la liste : la page `n` contient les notes `(n - 1) × 10` à `n �
 - ➕ On peut aller directement à n'importe quelle page et afficher « page 2 sur 5 »
 - ➕ Le lien `?page=3` est lisible et facile à tester au `curl`
 - ➖ Si une note est ajoutée ou supprimée pendant qu'on navigue, une note peut apparaître sur deux pages ou être sautée
-- ➖ Il faut valider `page` (0, négatif, texte) : erreur source du bug #1
+- ➖ Deux points à tenir : valider `page` (0, négatif, texte → erreur 400) et calculer le bon décalage. Le bug #1 venait du décalage (`page * size` au lieu de `(page - 1) * size`), pas de la validation
 
 ### Option B : curseur (`?after=<id>&limit=10`)
 
 L'API renvoie les 10 notes qui suivent un identifiant donné, et le curseur de la page suivante.
 
-- ➕ Pas de doublon ni de note sautée quand la liste change
+- ➕ Pas de doublon ni de note sautée quand la liste change, à condition que l'ordre des notes soit stable et que le curseur reste valide (voir le cas de la note supprimée ci-dessous)
 - ➕ Reste rapide sur de très grandes listes avec une base de données
 - ➖ Pas d'accès direct à la page 4, ni de « page X sur Y » : seulement Suivant (et Précédent si on garde un historique de curseurs)
 - ➖ Il faut un curseur qui résiste aux suppressions : les notes gardent l'ordre d'insertion du tableau (les nouvelles sont ajoutées à la fin), donc l'identifiant de la dernière note vue peut servir de curseur sans ordre supplémentaire, mais si cette note est supprimée entre deux requêtes, le curseur ne retrouve plus sa position
@@ -63,7 +63,7 @@ On garde **l'option A, la pagination par numéro de page** :
 Pour l'API :
 
 - ➕ Le calcul tient en une ligne (`(page - 1) * size`) et il est couvert par les tests.
-- ➖ La validation de `page` doit rester stricte, sinon on retombe sur le décalage de l'issue #1.
+- ➖ Deux règles à ne pas casser : la formule de découpage `(page - 1) * size` (son erreur était la cause de l'issue #1) et la validation stricte de `page`, qui refuse 0, les négatifs et le texte au lieu de renvoyer une page vide ou décalée.
 
 Pour le front :
 
