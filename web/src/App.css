@@ -7,7 +7,7 @@
 .notes-app textarea { resize: vertical; }
 .notes-app label { display: block; color: var(--text-h); }
 .notes-app button { cursor: pointer; background: var(--accent-bg); }
-.notes-app button:disabled { opacity: .5; cursor: default; }
+.notes-app button:disabled, .notes-app button[aria-disabled=true] { opacity: .5; cursor: default; }
 .notes-app :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .notes-app [role=alert] { color: var(--text-h); border-left: 4px solid #d54b40; padding: 12px; margin-top: 12px; }
 .notes-app [role=status] { margin-top: 12px; }
