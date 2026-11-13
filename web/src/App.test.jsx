@@ -142,7 +142,30 @@ describe('notes application', () => {
 
     await act(async () => { pending.resolve(json([{id: 'first', title: 'Première'}], 200, 12)); });
     expect(screen.getByText('Page 1 sur 2')).toBeTruthy();
-    expect(screen.getByRole('button', {name: 'Suivant'}).disabled).toBe(false);
+    expect(screen.getByRole('button', {name: 'Suivant'}).getAttribute('aria-disabled')).toBe('false');
+  });
+
+  it('keeps the pagination and the keyboard focus while the next page loads', async () => {
+    const pending = deferred();
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(json([{id: 'first', title: 'Première'}], 200, 12))
+      .mockImplementationOnce(() => pending.promise);
+    vi.stubGlobal('fetch', fetch);
+    render(<App />);
+    await screen.findByText('Page 1 sur 2');
+    const next = screen.getByRole('button', {name: 'Suivant'});
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(fetch.mock.calls.at(-1)[0]).toContain('/notes?page=2');
+    expect(screen.getByRole('navigation')).toBeTruthy();
+    expect(document.activeElement).toBe(next);
+    expect(next.getAttribute('aria-disabled')).toBe('true');
+    await userEvent.keyboard('{Enter}');
+    expect(fetch).toHaveBeenCalledTimes(2);
+
+    await act(async () => { pending.resolve(json([{id: 'last', title: 'Dernière'}], 200, 12)); });
+    expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
+    expect(document.activeElement).toBe(next);
   });
 
   it('ignores a stale search response that arrives after a more recent response', async () => {
