@@ -1,0 +1,20 @@
+# Qui relit quoi. La dernière règle qui correspond l'emporte.
+# Chaque partie a deux propriétaires : GitHub ne demande jamais la review de l'auteur de la PR,
+# il reste donc toujours quelqu'un d'autre à solliciter.
+
+# Par défaut : le propriétaire du dépôt
+*                 @Cromca
+
+# L'API
+/api/             @Cromca @Mohand-123
+
+# Le front
+/web/             @Mohand-123 @H129hj
+
+# La documentation
+/docs/            @H129hj @Cromca
+/README.md        @H129hj @Cromca @Mohand-123
+/CONTRIBUTING.md  @H129hj @Cromca @Mohand-123
+
+# Modèles d'issue et de PR, CI, ce fichier
+/.github/         @Cromca @H129hj
