@@ -30,7 +30,7 @@ npm start
 
 L'API écoute sur http://localhost:3000 (le terminal affiche `API sur http://127.0.0.1:3000`).
 
-Second terminal, le front :
+Second terminal, depuis la racine du dépôt `collaborative-notes-app`, le front :
 
 ```sh
 cd web
@@ -107,7 +107,19 @@ X-Total-Count: 1
 {"id":"655d8cf1-12af-4505-848b-fbca3958ab96","title":"Courses","body":"Pain, lait","tag":"perso"}
 ```
 
-Lister les notes (après l'ajout d'une seconde note « Réunion projet ») :
+Créer une seconde note :
+
+```sh
+curl -X POST http://localhost:3000/notes \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Réunion projet", "body": "Préparer la démo", "tag": "ecole"}'
+```
+
+```text
+{"id":"aaa9490d-ed62-4db9-86dd-547e88fa5ebd","title":"Réunion projet","body":"Préparer la démo","tag":"ecole"}
+```
+
+Lister les notes :
 
 ```sh
 curl -i "http://localhost:3000/notes?page=1"
