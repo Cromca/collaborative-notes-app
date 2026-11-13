@@ -222,6 +222,8 @@ Les tests de l'API démarrent un serveur sur un port libre avec un fichier de no
 
 Le workflow de l'équipe (issues, branches, pull requests, review, merge) est décrit dans [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Qui fait quoi dans l'équipe (matrice RACI) et où trouver chaque information : [docs/equipe.md](docs/equipe.md).
+
 ## Licence et auteurs
 
 Aucune licence de distribution n'est définie pour le moment : le choix est reporté par l'équipe.
