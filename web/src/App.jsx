@@ -13,6 +13,8 @@ export default function App() {
   const [tag, setTag] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  // Recherche à laquelle correspond `total` : null tant que rien n'est chargé, '' pour la liste complète.
+  const [totalQuery, setTotalQuery] = useState(null);
   const [revision, setRevision] = useState(0);
   const [settledRequest, setSettledRequest] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -24,6 +26,10 @@ export default function App() {
   const requestKey = makeRequestKey(page, query, revision);
   const loading = rawQuery !== query || settledRequest !== requestKey;
   const lastPage = Math.max(1, Math.ceil(total / 10));
+  // La barre reste affichée pendant un changement de page, mais pas tant que le total vient d'une recherche.
+  const showPagination = !rawQuery && !query && totalQuery === '';
+  const previousBlocked = loading || page <= 1;
+  const nextBlocked = loading || page >= lastPage;
 
   useEffect(() => {
     if (rawQuery === query) return undefined;
@@ -43,6 +49,7 @@ export default function App() {
         if (!active) return;
         setNotes(result.notes);
         setTotal(result.total);
+        setTotalQuery(query);
         setListError('');
         if (!query && page > Math.max(1, Math.ceil(result.total / 10))) setPage(1);
       })
@@ -67,7 +74,12 @@ export default function App() {
       setBody('');
       setTag('');
       setNotice('Note créée.');
-      if (!rawQuery) setPage(created.total === null ? Math.floor(total / 10) + 1 : Math.ceil(created.total / 10));
+      if (!rawQuery) {
+        // On met le total à jour en même temps que la page, sinon la barre afficherait « Page 2 sur 1 » pendant le chargement.
+        const newTotal = created.total ?? total + 1;
+        if (totalQuery === '') setTotal(newTotal);
+        setPage(Math.ceil(newTotal / 10));
+      }
       setRevision(value => value + 1);
     } catch (error) {
       setFormError(error.message);
@@ -115,10 +127,11 @@ export default function App() {
             ))}
           </ul>
         </>}
-        {!query && !loading && <nav aria-label="Pagination des notes">
-          <button disabled={loading || page <= 1} onClick={() => setPage(value => value - 1)}>Précédent</button>
+        {showPagination && <nav aria-label="Pagination des notes">
+          {/* aria-disabled plutôt que disabled : le bouton garde le focus clavier pendant le chargement. */}
+          <button aria-disabled={previousBlocked} onClick={() => { if (!previousBlocked) setPage(value => value - 1); }}>Précédent</button>
           <span>Page {page} sur {lastPage}</span>
-          <button disabled={loading || page >= lastPage} onClick={() => setPage(value => value + 1)}>Suivant</button>
+          <button aria-disabled={nextBlocked} onClick={() => { if (!nextBlocked) setPage(value => value + 1); }}>Suivant</button>
         </nav>}
       </section>
     </main>
